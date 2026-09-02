@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import CardGridSkeleton from '../components/CardGridSkeleton';
 import ErrorMessage from '../components/ErrorMessage';
 import MediaCard from '../components/MediaCard';
+import SearchSuggest, { type SearchSuggestHandle } from '../components/SearchSuggest';
 import { useWatchlistContext } from '../context/WatchlistContext';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
+import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
 import { searchMedia } from '../services/tmdb';
 import type { MediaResponse } from '../types';
 
@@ -13,9 +15,13 @@ const SEARCH_DEBOUNCE_MS = 500;
 export default function SearchPage() {
   const [searchParams] = useSearchParams();
   const urlQuery = searchParams.get('q') ?? '';
+  const navigate = useNavigate();
   const [localQuery, setLocalQuery] = useState(urlQuery);
   const debouncedQuery = useDebouncedValue(localQuery, SEARCH_DEBOUNCE_MS);
   const { isInWatchlist, toggleWatchlist } = useWatchlistContext();
+  const { suggestions, isLoading: isLoadingSuggestions } = useSearchSuggestions(localQuery);
+  const [inputFocused, setInputFocused] = useState(false);
+  const suggestRef = useRef<SearchSuggestHandle>(null);
 
   const [state, setState] = useState<{
     data: MediaResponse | null;
@@ -53,12 +59,31 @@ export default function SearchPage() {
   }, [debouncedQuery]);
 
   const trimmed = debouncedQuery.trim();
+  const showDropdown = inputFocused && (suggestions.length > 0 || isLoadingSuggestions);
+
+  const handleSelectSuggestion = (item: { mediaType: 'movie' | 'tv'; id: number }) => {
+    navigate(`/${item.mediaType}/${item.id}`);
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (!inputFocused) return;
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      suggestRef.current?.navigate(1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      suggestRef.current?.navigate(-1);
+    } else if (event.key === 'Enter' && suggestions.length > 0) {
+      event.preventDefault();
+      suggestRef.current?.selectActive();
+    }
+  };
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <h1 className="mb-6 text-2xl font-bold text-white">Search</h1>
 
-      <form role="search" onSubmit={(event) => event.preventDefault()} className="mb-6">
+      <form role="search" onSubmit={(event) => event.preventDefault()} className="mb-6 relative max-w-xl">
         <label htmlFor="search-query" className="sr-only">
           Search movies and TV shows
         </label>
@@ -67,9 +92,21 @@ export default function SearchPage() {
           type="search"
           value={localQuery}
           onChange={(event) => setLocalQuery(event.target.value)}
+          onFocus={() => setInputFocused(true)}
+          onBlur={() => setInputFocused(false)}
+          onKeyDown={handleKeyDown}
           placeholder="Search movies, TV shows, people…"
-          className="w-full max-w-xl rounded-lg border border-surface-lighter bg-surface-light px-4 py-3 text-white placeholder-muted focus:border-brand focus:outline-none"
+          autoComplete="off"
+          className="w-full rounded-lg border border-surface-lighter bg-surface-light px-4 py-3 text-white placeholder-muted focus:border-brand focus:outline-none"
         />
+        {showDropdown && (
+          <SearchSuggest
+            ref={suggestRef}
+            suggestions={suggestions}
+            isLoading={isLoadingSuggestions}
+            onSelect={handleSelectSuggestion}
+          />
+        )}
       </form>
 
       {!trimmed && (

@@ -1,10 +1,16 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import SearchBar from './SearchBar';
+import type { SuggestionItem } from '../types';
 
 interface NavbarProps {
   watchlistCount: number;
+  searchQuery: string;
+  suggestions: SuggestionItem[];
+  isLoadingSuggestions: boolean;
+  onQueryChange: (query: string) => void;
   onSearch: (query: string) => void;
+  onSelectSuggestion: (item: SuggestionItem) => void;
 }
 
 const navItems = [
@@ -13,7 +19,15 @@ const navItems = [
   { to: '/watchlist', label: 'Watchlist' },
 ];
 
-export default function Navbar({ watchlistCount, onSearch }: NavbarProps) {
+export default function Navbar({
+  watchlistCount,
+  searchQuery,
+  suggestions,
+  isLoadingSuggestions,
+  onQueryChange,
+  onSearch,
+  onSelectSuggestion,
+}: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -45,7 +59,14 @@ export default function Navbar({ watchlistCount, onSearch }: NavbarProps) {
         </div>
 
         <div className="flex items-center gap-3">
-          <SearchBar onSearch={onSearch} />
+          <SearchBar
+            value={searchQuery}
+            suggestions={suggestions}
+            isLoadingSuggestions={isLoadingSuggestions}
+            onQueryChange={onQueryChange}
+            onSearch={onSearch}
+            onSelectSuggestion={onSelectSuggestion}
+          />
           <span className="hidden text-xs text-muted sm:inline" aria-hidden="true">
             {watchlistCount} saved
           </span>

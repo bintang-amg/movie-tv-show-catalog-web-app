@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { MediaResponse, Person } from '../types';
+import type { MediaDetail, MediaItem, MediaResponse, Person } from '../types';
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -61,4 +61,28 @@ export async function fetchPopularPeople(params: FetchListParams = {}) {
 
 export async function searchMedia(query: string): Promise<MediaResponse> {
   return fetchList('/search/multi', { query });
+}
+
+export async function searchMovieSuggestions(query: string): Promise<MediaItem[]> {
+  const { data } = await api.get<MediaResponse>('/search/movie', { params: { query } });
+  return data.results;
+}
+
+export async function searchTvSuggestions(query: string): Promise<MediaItem[]> {
+  const { data } = await api.get<MediaResponse>('/search/tv', { params: { query } });
+  return data.results;
+}
+
+export async function fetchMovieDetail(id: number): Promise<MediaDetail> {
+  const { data } = await api.get<MediaDetail>(`/movie/${id}`, {
+    params: { append_to_response: '' },
+  });
+  return { ...data, media_type: 'movie' };
+}
+
+export async function fetchTvDetail(id: number): Promise<MediaDetail> {
+  const { data } = await api.get<MediaDetail>(`/tv/${id}`, {
+    params: { append_to_response: '' },
+  });
+  return { ...data, media_type: 'tv' };
 }

@@ -5,6 +5,8 @@ A responsive web application for browsing movies and TV shows, powered by the [T
 ## Features
 
 - Browse movies and TV shows across 8+ categories
+- Live search suggestions (debounced) with dropdown, browseable via mouse or keyboard
+- Detail pages for movies & TV shows (poster, backdrop, genres, overview, watchlist)
 - Real-time multi-search (movies, TV shows, people)
 - Add / remove items to a persistent watchlist (localStorage)
 - Loading skeletons while data is fetched
@@ -60,12 +62,13 @@ The app runs at `http://localhost:5173` by default.
 
 ```
 src/
-  components/     Reusable UI components (Navbar, MediaCard, SearchBar, …)
+  components/     Reusable presentational UI components (Navbar, MediaCard, SearchBar, SearchSuggest, …)
   context/        React contexts (WatchlistContext)
-  hooks/          Custom hooks (useFetch, useWatchlist)
-  pages/          Route-level page components
-  services/       TMDB API client and image helpers
+  hooks/          Custom hooks (useFetch, useWatchlist, useDebouncedValue, useSearchSuggestions)
+  pages/          Route-level page components (own the API/state, pass props to components)
+  services/       TMDB API client
   types/          Shared TypeScript interfaces
+  utils/          Pure helper utilities (image URL builder)
 ```
 
 ## TMDB API Endpoints Used
@@ -79,6 +82,10 @@ src/
 7. `/tv/on_the_air` – On The Air TV Shows
 8. `/tv/airing_today` – Airing Today TV Shows
 9. `/search/multi` – Multi Search
+10. `/search/movie` – Movie search (suggestions)
+11. `/search/tv` – TV show search (suggestions)
+12. `/movie/:id` – Movie detail
+13. `/tv/:id` – TV show detail
 
 ## License
 
