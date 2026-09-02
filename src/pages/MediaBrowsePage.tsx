@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import CardGridSkeleton from '../components/CardGridSkeleton';
 import ErrorMessage from '../components/ErrorMessage';
 import MediaCard from '../components/MediaCard';
@@ -27,6 +27,14 @@ export default function MediaBrowsePage({ heading, tabs }: MediaBrowsePageProps)
       ? activeTab.fetcher
       : async () => ({ results: [], page: 1, total_pages: 0, total_results: 0 }),
   );
+
+  const previousTabId = useRef(activeTabId);
+  useEffect(() => {
+    if (previousTabId.current !== activeTabId) {
+      previousTabId.current = activeTabId;
+      reload();
+    }
+  }, [reload, activeTabId]);
 
   const renderCard = (item: MediaItem) => (
     <MediaCard
