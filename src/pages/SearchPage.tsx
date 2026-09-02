@@ -1,17 +1,20 @@
-import { useDeferredValue, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import CardGridSkeleton from '../components/CardGridSkeleton';
 import ErrorMessage from '../components/ErrorMessage';
 import MediaCard from '../components/MediaCard';
 import { useWatchlistContext } from '../context/WatchlistContext';
+import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { searchMedia } from '../services/tmdb';
 import type { MediaResponse } from '../types';
+
+const SEARCH_DEBOUNCE_MS = 500;
 
 export default function SearchPage() {
   const [searchParams] = useSearchParams();
   const urlQuery = searchParams.get('q') ?? '';
   const [localQuery, setLocalQuery] = useState(urlQuery);
-  const deferredQuery = useDeferredValue(localQuery);
+  const debouncedQuery = useDebouncedValue(localQuery, SEARCH_DEBOUNCE_MS);
   const { isInWatchlist, toggleWatchlist } = useWatchlistContext();
 
   const [state, setState] = useState<{
@@ -25,7 +28,7 @@ export default function SearchPage() {
   }, [urlQuery]);
 
   useEffect(() => {
-    const trimmed = deferredQuery.trim();
+    const trimmed = debouncedQuery.trim();
     if (!trimmed) {
       setState({ data: null, isLoading: false, error: null });
       return;
@@ -47,9 +50,9 @@ export default function SearchPage() {
     return () => {
       cancelled = true;
     };
-  }, [deferredQuery]);
+  }, [debouncedQuery]);
 
-  const trimmed = deferredQuery.trim();
+  const trimmed = debouncedQuery.trim();
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
