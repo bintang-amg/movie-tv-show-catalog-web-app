@@ -44,10 +44,10 @@ export default function Navbar({
         <NavLink
           to="/"
           className="flex items-center gap-2 text-xl font-bold tracking-tight text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-          aria-label="ReelRack home"
+          aria-label="MovieDB home"
         >
           <span aria-hidden="true" className="text-brand">▶</span>
-          ReelRack
+          MovieDB
         </NavLink>
 
         <div className="hidden items-center gap-2 md:flex">

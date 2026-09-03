@@ -1,4 +1,4 @@
-# ReelRack – Movie & TV Show Catalog
+# MovieDB – Movie & TV Show Catalog
 
 A responsive web application for browsing movies and TV shows, powered by the [TMDB API](https://www.themoviedb.org/documentation/api).
 
