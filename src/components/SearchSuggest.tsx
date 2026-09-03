@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import type { SuggestionItem } from '../types';
 
 export interface SearchSuggestHandle {
@@ -16,26 +16,38 @@ interface SearchSuggestProps {
 const SearchSuggest = forwardRef<SearchSuggestHandle, SearchSuggestProps>(
   function SearchSuggest({ suggestions, isLoading, onSelect }, ref) {
     const [activeIndex, setActiveIndex] = useState(-1);
+    const optionRefs = useRef<Array<HTMLLIElement | null>>([]);
 
     useEffect(() => {
       setActiveIndex(-1);
     }, [suggestions]);
 
+    useEffect(() => {
+      const option = optionRefs.current[activeIndex];
+      if (option) {
+        option.scrollIntoView({ block: 'nearest' });
+      }
+    }, [activeIndex]);
+
+    const navigate = (direction: -1 | 1) => {
+      setActiveIndex((prev) => {
+        const last = suggestions.length - 1;
+        if (last < 0) return -1;
+        const next = prev + direction;
+        if (next < 0) return last;
+        if (next > last) return 0;
+        return next;
+      });
+    };
+
+    const selectActive = () => {
+      const active = suggestions[activeIndex];
+      if (active) onSelect(active);
+    };
+
     useImperativeHandle(ref, () => ({
-      navigate(direction) {
-        setActiveIndex((prev) => {
-          const last = suggestions.length - 1;
-          if (last < 0) return -1;
-          const next = prev + direction;
-          if (next < 0) return last;
-          if (next > last) return 0;
-          return next;
-        });
-      },
-      selectActive() {
-        const active = suggestions[activeIndex];
-        if (active) onSelect(active);
-      },
+      navigate,
+      selectActive,
       clear() {
         setActiveIndex(-1);
       },
@@ -60,12 +72,18 @@ const SearchSuggest = forwardRef<SearchSuggestHandle, SearchSuggestProps>(
             {suggestions.map((item, index) => (
               <li
                 key={`${item.mediaType}-${item.id}`}
+                ref={(el) => {
+                  optionRefs.current[index] = el;
+                }}
                 role="option"
                 aria-selected={index === activeIndex}
               >
                 <button
                   type="button"
-                  onClick={() => onSelect(item)}
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    onSelect(item);
+                  }}
                   onMouseEnter={() => setActiveIndex(index)}
                   className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors focus:outline-none ${
                     index === activeIndex ? 'bg-surface-lighter' : ''

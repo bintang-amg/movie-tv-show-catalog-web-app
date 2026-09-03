@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import ErrorMessage from '../components/ErrorMessage';
 import { useWatchlistContext } from '../context/WatchlistContext';
@@ -16,6 +17,15 @@ export default function DetailPage() {
     mediaType === 'tv' ? () => fetchTvDetail(numericId) : () => fetchMovieDetail(numericId);
 
   const { data, isLoading, error, reload } = useFetch<MediaDetail>(fetcher);
+
+  // Refetch when the route id changes without remounting the page.
+  const previousId = useRef(numericId);
+  useEffect(() => {
+    if (previousId.current !== numericId) {
+      previousId.current = numericId;
+      reload();
+    }
+  }, [reload, numericId]);
 
   const title = data?.title ?? data?.name ?? 'Untitled';
   const year = (data?.release_date ?? data?.first_air_date ?? '').slice(0, 4) || 'N/A';
