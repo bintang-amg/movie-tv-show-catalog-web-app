@@ -37,39 +37,44 @@ export default function Navbar({
 
   return (
     <header className="sticky top-0 z-50 border-b border-surface-lighter bg-surface/95 backdrop-blur">
-      <nav
-        aria-label="Main navigation"
-        className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6"
-      >
-        <NavLink
-          to="/"
-          className="flex items-center gap-2 text-xl font-bold tracking-tight text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-          aria-label="MovieDB home"
+      <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
+        <nav
+          aria-label="Main navigation"
+          className="flex items-center justify-between gap-3"
         >
-          <span aria-hidden="true" className="text-brand">▶</span>
-          MovieDB
-        </NavLink>
-
-        <div className="hidden items-center gap-2 md:flex">
-          {navItems.map((item) => (
-            <NavLink key={item.to} to={item.to} className={linkClass}>
-              {item.label}
+          <div className="flex items-center gap-3">
+            <NavLink
+              to="/"
+              className="flex items-center gap-2 text-xl font-bold tracking-tight text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+              aria-label="MovieDB home"
+            >
+              <span aria-hidden="true" className="text-brand">▶</span>
+              MovieDB
             </NavLink>
-          ))}
-        </div>
+          </div>
 
-        <div className="flex items-center gap-3">
-          <SearchBar
-            value={searchQuery}
-            suggestions={suggestions}
-            isLoadingSuggestions={isLoadingSuggestions}
-            onQueryChange={onQueryChange}
-            onSearch={onSearch}
-            onSelectSuggestion={onSelectSuggestion}
-          />
-          <span className="hidden text-xs text-muted sm:inline" aria-hidden="true">
-            {watchlistCount} saved
-          </span>
+          <div className="hidden items-center gap-2 md:flex">
+            {navItems.map((item) => (
+              <NavLink key={item.to} to={item.to} className={linkClass}>
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+
+          <div className="hidden items-center gap-3 md:flex">
+            <SearchBar
+              value={searchQuery}
+              suggestions={suggestions}
+              isLoadingSuggestions={isLoadingSuggestions}
+              onQueryChange={onQueryChange}
+              onSearch={onSearch}
+              onSelectSuggestion={onSelectSuggestion}
+            />
+            <span className="hidden text-xs text-muted md:inline" aria-hidden="true">
+              {watchlistCount} saved
+            </span>
+          </div>
+
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
@@ -80,21 +85,40 @@ export default function Navbar({
           >
             <span aria-hidden="true">{menuOpen ? '✕' : '☰'}</span>
           </button>
+        </nav>
+
+        <div className="mt-3 md:hidden">
+          <SearchBar
+            value={searchQuery}
+            suggestions={suggestions}
+            isLoadingSuggestions={isLoadingSuggestions}
+            onQueryChange={onQueryChange}
+            onSearch={onSearch}
+            onSelectSuggestion={onSelectSuggestion}
+          />
         </div>
-      </nav>
+      </div>
 
       {menuOpen && (
-        <div id="mobile-menu" className="border-t border-surface-lighter px-4 py-2 md:hidden">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              onClick={() => setMenuOpen(false)}
-              className={linkClass}
-            >
-              {item.label}
-            </NavLink>
-          ))}
+        <div
+          id="mobile-menu"
+          className="border-t border-surface-lighter px-4 py-3 md:hidden"
+        >
+          <div className="flex flex-wrap gap-2">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={() => setMenuOpen(false)}
+                className={linkClass}
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+          <p className="mt-3 text-xs text-muted" aria-hidden="true">
+            {watchlistCount} saved
+          </p>
         </div>
       )}
     </header>

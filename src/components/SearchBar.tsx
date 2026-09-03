@@ -61,7 +61,7 @@ export default function SearchBar({
         onKeyDown={handleKeyDown}
         placeholder="Search…"
         autoComplete="off"
-        className="w-32 rounded-full border border-surface-lighter bg-surface-light px-4 py-1.5 text-sm text-white placeholder-muted transition-all focus:w-48 focus:border-brand focus:outline-none sm:w-44 sm:focus:w-56"
+        className="w-full rounded-full border border-surface-lighter bg-surface-light px-4 py-1.5 text-sm text-white placeholder-muted focus:border-brand focus:outline-none md:w-44 lg:w-56"
       />
       {showDropdown && (
         <SearchSuggest
